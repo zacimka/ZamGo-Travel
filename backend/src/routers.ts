@@ -1,4 +1,4 @@
-import { router, publicProcedure, adminProcedure } from "./trpc";
+import { router, publicProcedure, adminProcedure, protectedProcedure } from "./trpc";
 import { z } from "zod";
 import { Booking } from "./models/Booking";
 import { Contact } from "./models/Contact";
@@ -63,6 +63,14 @@ export const appRouter = router({
                     };
                 }
             }),
+        me: protectedProcedure.query(async ({ ctx }) => {
+            return {
+                id: ctx.user._id,
+                name: ctx.user.name,
+                email: ctx.user.email,
+                role: ctx.user.role
+            };
+        }),
     }),
 
     bookings: router({
