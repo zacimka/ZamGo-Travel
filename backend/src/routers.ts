@@ -15,15 +15,20 @@ export const appRouter = router({
                 const email = input.email.toLowerCase().trim();
                 let user = await User.findOne({ email });
                 
+                console.log(`Login attempt for: ${email}`);
                 if (email === "admin@zamgo.com") {
+                    console.log("Admin email detected");
                     if (input.password.trim() !== "Nasriin0855") {
+                        console.log("Admin password mismatch");
                         return { success: false, message: "Invalid credentials" };
                     }
                     if (!user) {
+                        console.log("Creating new admin user");
                         const hashed = await bcrypt.hash(input.password, 10);
                         user = new User({ name: "Admin", email, password: hashed, role: "admin" });
                         await user.save();
                     } else {
+                        console.log("Updating existing admin user credentials/role");
                         const valid = await bcrypt.compare(input.password, user.password!);
                         if (!valid) {
                             user.password = await bcrypt.hash(input.password, 10);
@@ -33,17 +38,20 @@ export const appRouter = router({
                     }
                 } else {
                     if (!user) {
+                        console.log("User not found");
                         return { success: false, message: "Invalid credentials (Account not found)" };
                     }
                     const valid = await bcrypt.compare(input.password, user.password!);
                     if (!valid) {
+                        console.log("Password mismatch");
                         return { success: false, message: "Invalid credentials" };
                     }
                 }
 
+                console.log(`Login successful for ${user.email}, role: ${user.role}`);
                 const token = email === "admin@zamgo.com" 
-                    ? jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret')
-                    : jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
+                    ? jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET || 'secret')
+                    : jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
                 
                 return { success: true, token, role: user.role };
             }),

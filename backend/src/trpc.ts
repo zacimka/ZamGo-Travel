@@ -17,10 +17,14 @@ export const createContext = async ({
         token,
         process.env.JWT_SECRET || "secret",
       ) as any;
+      console.log(`Token verified for user ID: ${decoded.id}`);
       user = await User.findById(decoded.id);
+      if (!user) console.log(`User not found in DB for ID: ${decoded.id}`);
     } catch (e) {
-      // invalid token
+      console.log("Token verification failed:", e instanceof Error ? e.message : e);
     }
+  } else {
+    if (authHeader) console.log("Malformed auth header or missing Bearer prefix");
   }
   return { req, res, user };
 };
