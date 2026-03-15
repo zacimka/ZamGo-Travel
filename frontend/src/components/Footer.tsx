@@ -142,6 +142,7 @@ export default function Footer() {
                 {item}
               </button>
             ))}
+            <a href="/login" className="text-white/40 hover:text-orange-400 text-xs font-body transition-colors font-medium ml-2 border-l border-white/20 pl-4">Admin Login</a>
           </div>
           <div className="flex items-center gap-2 text-white/40 text-xs font-body">
             <span>Made with</span>

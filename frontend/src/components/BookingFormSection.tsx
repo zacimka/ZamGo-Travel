@@ -1,22 +1,11 @@
 /* ZamGo Travel — Trip Booking Form Section
    Design: Split layout — left info panel, right form with success confirmation */
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CheckCircle2, Send, User, Mail, Phone, MapPin, Calendar, Users, MessageSquare } from "lucide-react";
 import { trpc } from "../lib/trpc";
 import { toast } from "sonner";
 
-const DESTINATIONS_LIST = [
-  "Bali, Indonesia",
-  "Paris, France",
-  "Dubai, UAE",
-  "Tokyo, Japan",
-  "Maldives",
-  "Santorini, Greece",
-  "New York, USA",
-  "Rome, Italy",
-  "Barcelona, Spain",
-  "Other",
-];
+// Removed hardcoded destinations to allow any worldwide destination
 
 export default function BookingFormSection() {
   const [form, setForm] = useState({
@@ -33,6 +22,45 @@ export default function BookingFormSection() {
   const [loading, setLoading] = useState(false);
   const bookingMutation = trpc.bookings.create.useMutation();
 
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (form.destination.length < 3 || !showSuggestions) {
+      setSuggestions([]);
+      return;
+    }
+    
+    // Debounce to prevent too many API requests while typing
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.destination)}&format=json&addressdetails=1&featuretype=city&limit=5`);
+        const data = await res.json();
+        setSuggestions(data);
+      } catch (err) {
+        console.error("Error fetching cities:", err);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [form.destination, showSuggestions]);
+
+  const handleDestinationSelect = (city: string) => {
+    setForm(prev => ({ ...prev, destination: city }));
+    setShowSuggestions(false);
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -48,7 +76,7 @@ export default function BookingFormSection() {
         fullName: form.fullName,
         email: form.email,
         phone: form.phone,
-        packageId: 1,
+        destination: form.destination,
         departureDate: new Date(form.departureDate),
         returnDate: new Date(form.returnDate),
         travelersCount: parseInt(form.travelers),
@@ -233,20 +261,37 @@ export default function BookingFormSection() {
                       <label className="block text-sm font-semibold text-slate-700 mb-1.5 font-body">
                         Destination *
                       </label>
-                      <div className="relative">
+                      <div className="relative" ref={suggestionRef}>
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <select
+                        <input
+                          type="text"
                           name="destination"
                           value={form.destination}
-                          onChange={handleChange}
+                          onChange={(e) => {
+                            handleChange(e);
+                            setShowSuggestions(true);
+                          }}
+                          onFocus={() => setShowSuggestions(true)}
+                          autoComplete="off"
                           required
-                          className={`${inputClass} pl-10 appearance-none`}
-                        >
-                          <option value="">Select destination</option>
-                          {DESTINATIONS_LIST.map((d) => (
-                            <option key={d} value={d}>{d}</option>
-                          ))}
-                        </select>
+                          placeholder="Search city, country..."
+                          className={`${inputClass} pl-10`}
+                        />
+                        {/* Autocomplete Dropdown */}
+                        {showSuggestions && suggestions.length > 0 && (
+                          <div className="absolute z-50 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-64 overflow-y-auto">
+                            {suggestions.map((item, idx) => (
+                              <div
+                                key={idx}
+                                className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm font-body text-slate-700 border-b border-slate-50 last:border-0 flex items-start gap-3 transition-colors"
+                                onClick={() => handleDestinationSelect(item.display_name)}
+                              >
+                                <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                                <span className="leading-snug">{item.display_name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

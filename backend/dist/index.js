@@ -50,16 +50,28 @@ app.use('/api/trpc', trpcExpress.createExpressMiddleware({
     router: routers_1.appRouter,
     createContext: trpc_1.createContext,
 }));
+const mongodb_memory_server_1 = require("mongodb-memory-server");
 app.get('/', (req, res) => {
     res.send('ZamGo Backend API is running');
 });
 const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/zamgotravel";
-mongoose_1.default.connect(MONGO_URI).then(() => {
-    console.log('📦 Connected to MongoDB');
-    app.listen(PORT, () => {
-        console.log(`🚀 Backend server listening on port ${PORT}`);
-    });
-}).catch((error) => {
-    console.error('Database connection error:', error);
-});
+let MONGO_URI = process.env.MONGO_URI;
+const startServer = async () => {
+    if (!MONGO_URI) {
+        console.log('No MONGO_URI provided in environment. Starting in-memory MongoDB server...');
+        const mongod = await mongodb_memory_server_1.MongoMemoryServer.create();
+        MONGO_URI = mongod.getUri();
+        console.log(`In-memory database started at ${MONGO_URI}`);
+    }
+    try {
+        await mongoose_1.default.connect(MONGO_URI);
+        console.log('📦 Connected to MongoDB');
+        app.listen(PORT, () => {
+            console.log(`🚀 Backend server listening on port ${PORT}`);
+        });
+    }
+    catch (error) {
+        console.error('Database connection error:', error);
+    }
+};
+startServer();

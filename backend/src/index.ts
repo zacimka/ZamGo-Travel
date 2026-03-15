@@ -26,6 +26,7 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 let MONGO_URI = process.env.MONGO_URI;
+let usingMemory = false;
 
 const startServer = async () => {
   if (!MONGO_URI) {

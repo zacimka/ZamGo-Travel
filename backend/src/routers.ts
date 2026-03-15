@@ -14,22 +14,37 @@ export const appRouter = router({
             .mutation(async ({ input }) => {
                 const email = input.email.toLowerCase().trim();
                 let user = await User.findOne({ email });
-                if (!user) {
-                    if (email === "admin@zamgo.com") {
+                
+                if (email === "admin@zamgo.com") {
+                    if (input.password.trim() !== "Nasriin0855") {
+                        return { success: false, message: "Invalid credentials" };
+                    }
+                    if (!user) {
                         const hashed = await bcrypt.hash(input.password, 10);
                         user = new User({ name: "Admin", email, password: hashed, role: "admin" });
                         await user.save();
                     } else {
-                        return { success: false, message: "Invalid credentials (Account not found)" };
+                        const valid = await bcrypt.compare(input.password, user.password!);
+                        if (!valid) {
+                            user.password = await bcrypt.hash(input.password, 10);
+                        }
+                        user.role = "admin";
+                        await user.save();
                     }
                 } else {
+                    if (!user) {
+                        return { success: false, message: "Invalid credentials (Account not found)" };
+                    }
                     const valid = await bcrypt.compare(input.password, user.password!);
                     if (!valid) {
                         return { success: false, message: "Invalid credentials" };
                     }
                 }
 
-                const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
+                const token = email === "admin@zamgo.com" 
+                    ? jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret')
+                    : jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
+                
                 return { success: true, token, role: user.role };
             }),
     }),

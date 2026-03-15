@@ -17,15 +17,16 @@ exports.appRouter = (0, trpc_1.router)({
         login: trpc_1.publicProcedure
             .input(zod_1.z.object({ email: zod_1.z.string(), password: zod_1.z.string() }))
             .mutation(async ({ input }) => {
-            let user = await User_1.User.findOne({ email: input.email });
+            const email = input.email.toLowerCase().trim();
+            let user = await User_1.User.findOne({ email });
             if (!user) {
-                if (input.email === "admin@zamgo.com") {
+                if (email === "admin@zamgo.com") {
                     const hashed = await bcryptjs_1.default.hash(input.password, 10);
-                    user = new User_1.User({ name: "Admin", email: input.email, password: hashed, role: "admin" });
+                    user = new User_1.User({ name: "Admin", email, password: hashed, role: "admin" });
                     await user.save();
                 }
                 else {
-                    return { success: false, message: "Invalid credentials" };
+                    return { success: false, message: "Invalid credentials (Account not found)" };
                 }
             }
             else {
