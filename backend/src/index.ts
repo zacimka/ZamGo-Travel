@@ -39,57 +39,38 @@ app.use(
   }),
 );
 
-// Catch-all for failed API matches to ensure we return JSON, not a string
-app.use("/api/*", (req, res, next) => {
-  // If it's the specific admin login route, skip the 404
-  if (req.path === "/api/admin/login" || req.originalUrl === "/api/admin/login") {
-      return next();
+// Implementation of the suggested /api/admin/login route
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // We use User model which is the defined model in this project
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.error("Login failed: user not found", email);
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password!);
+    if (!isMatch) {
+      console.error("Login failed: password mismatch", email);
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET || 'secret', { expiresIn: "1h" });
+    res.json({ success: true, token, role: user.role });
+
+  } catch (err) {
+    console.error("Exact login error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
+});
+
+// Catch-all for failed API matches - placed AFTER valid routes
+app.use("/api/*", (req, res) => {
   res.status(404).json({ error: "API endpoint not found", path: req.path });
 });
 
-// Implementation of the suggested /api/admin/login route
-app.post("/api/admin/login", async (req, res) => {
-    try {
-        const { email: inputEmail, password } = req.body;
-        if (!inputEmail || !password) {
-            return res.status(400).json({ success: false, message: "Email and password required" });
-        }
-
-        const email = inputEmail.toLowerCase().trim();
-        let user = await User.findOne({ email });
-
-        console.log(`REST Login attempt for: ${email}`);
-        
-        if (email === "admin@zamgo.com") {
-            if (password.trim() !== "Nasriin0855") {
-                return res.status(401).json({ success: false, message: "Invalid credentials" });
-            }
-            if (!user) {
-                const hashed = await bcrypt.hash(password, 10);
-                user = new User({ name: "Admin", email, password: hashed, role: "admin" });
-                await user.save();
-            }
-        } else {
-            if (!user) {
-                return res.status(401).json({ success: false, message: "Invalid credentials" });
-            }
-            const valid = await bcrypt.compare(password, user.password!);
-            if (!valid) {
-                return res.status(401).json({ success: false, message: "Invalid credentials" });
-            }
-        }
-
-        const token = email === "admin@zamgo.com" 
-            ? jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET || 'secret')
-            : jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
-
-        res.json({ success: true, token, role: user.role });
-    } catch (error) {
-        console.error("REST Login Error:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
-    }
-});
 
 import { MongoMemoryServer } from "mongodb-memory-server";
 
