@@ -3,8 +3,10 @@ import { trpc } from "../lib/trpc";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LogIn } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
+    const { login } = useAuth();
     const { register, handleSubmit, formState: { errors } } = useForm();
     const navigate = useNavigate();
     const loginMutation = trpc.auth.login.useMutation();
@@ -24,16 +26,8 @@ export default function Login() {
             const res = await response.json();
 
             if (res.success && res.token) {
-                localStorage.setItem("token", res.token);
                 toast.success("Login successful!");
-
-                setTimeout(() => {
-                    if (res.role === "admin") {
-                        navigate("/admin");
-                    } else {
-                        navigate("/");
-                    }
-                }, 100);
+                login(res.token, res.role);
             } else {
                 toast.error(res.message || "Invalid credentials");
             }

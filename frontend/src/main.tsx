@@ -16,6 +16,8 @@ import Packages from './pages/Packages';
 import WhyZamGo from './pages/WhyZamGo';
 import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
     const [queryClient] = useState(() => new QueryClient());
@@ -63,18 +65,27 @@ function App() {
     return (
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <QueryClientProvider client={queryClient}>
-                <BrowserRouter>
-                    <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/admin" element={<AdminDashboard />} />
-                        <Route path="/destinations" element={<Destinations />} />
-                        <Route path="/packages" element={<Packages />} />
-                        <Route path="/why-zamgo" element={<WhyZamGo />} />
-                        <Route path="/reviews" element={<Reviews />} />
-                        <Route path="/contact" element={<Contact />} />
-                    </Routes>
-                </BrowserRouter>
+                <AuthProvider>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route 
+                                path="/admin" 
+                                element={
+                                    <ProtectedRoute adminOnly>
+                                        <AdminDashboard />
+                                    </ProtectedRoute>
+                                } 
+                            />
+                            <Route path="/destinations" element={<Destinations />} />
+                            <Route path="/packages" element={<Packages />} />
+                            <Route path="/why-zamgo" element={<WhyZamGo />} />
+                            <Route path="/reviews" element={<Reviews />} />
+                            <Route path="/contact" element={<Contact />} />
+                        </Routes>
+                    </BrowserRouter>
+                </AuthProvider>
                 <Toaster position="bottom-right" />
             </QueryClientProvider>
         </trpc.Provider>

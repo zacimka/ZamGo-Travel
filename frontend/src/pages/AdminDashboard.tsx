@@ -2,8 +2,10 @@ import { trpc } from "../lib/trpc";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, Clock, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function AdminDashboard() {
+    const { logout } = useAuth();
     const navigate = useNavigate();
     const { data: bookings, refetch, isLoading, isError } = trpc.bookings.getAllBookings.useQuery();
     const updateStatus = trpc.bookings.updateBookingStatus.useMutation({
@@ -17,8 +19,7 @@ export default function AdminDashboard() {
     });
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/login");
+        logout();
     };
 
     if (isLoading) return <div className="p-10 text-center font-body text-slate-500">Loading bookings...</div>;
