@@ -1,17 +1,35 @@
 /* ZamGo Travel — Contact Section
    Design: Split layout — left contact info, right contact form */
 import { useState } from "react";
-import { Mail, Phone, MapPin, Send, CheckCircle2, Facebook, Twitter, Instagram, Youtube, Linkedin } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+  CheckCircle2,
+  Facebook,
+  Twitter,
+  Instagram,
+  Youtube,
+  Linkedin,
+} from "lucide-react";
 import { trpc } from "../lib/trpc";
 import { toast } from "sonner";
 
 export default function ContactSection() {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const contactMutation = trpc.contact.submit.useMutation();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -61,7 +79,8 @@ export default function ContactSection() {
           </div>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <h2 className="font-display text-4xl md:text-5xl font-bold text-blue-950 leading-tight">
-              We'd Love to <span className="text-gradient-blue">Hear From You</span>
+              We'd Love to{" "}
+              <span className="text-gradient-blue">Hear From You</span>
             </h2>
             <p className="text-slate-500 max-w-md font-body leading-relaxed">
               Have questions about a destination or package? Our friendly team
@@ -78,21 +97,24 @@ export default function ContactSection() {
               {
                 icon: Mail,
                 title: "Email Us",
-                lines: ["hello@zamgotravel.com", "bookings@zamgotravel.com"],
+                lines: ["info@zamgotravel.com"],
                 color: "bg-blue-100 text-blue-600",
               },
               {
                 icon: Phone,
                 title: "Call Us",
-                lines: ["+1 (234) 567-8900", "+1 (234) 567-8901"],
+                lines: ["+44 208 044 8838",],
                 color: "bg-orange-100 text-orange-600",
               },
-              {
-                icon: MapPin,
-                title: "Visit Our Office",
-                lines: ["123 Travel Boulevard, Suite 400", "New York, NY 10001, USA"],
-                color: "bg-emerald-100 text-emerald-600",
-              },
+              // {
+              //   icon: MapPin,
+              //   title: "Visit Our Office",
+              //   lines: [
+              //     "123 Travel Boulevard, Suite 400",
+              //     "New York, NY 10001, USA",
+              //   ],
+              //   color: "bg-emerald-100 text-emerald-600",
+              // },
             ].map((item) => {
               const Icon = item.icon;
               return (
@@ -100,13 +122,22 @@ export default function ContactSection() {
                   key={item.title}
                   className="flex items-start gap-4 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
                 >
-                  <div className={`w-12 h-12 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0`}
+                  >
                     <Icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="font-semibold text-blue-950 font-body mb-1">{item.title}</div>
+                    <div className="font-semibold text-blue-950 font-body mb-1">
+                      {item.title}
+                    </div>
                     {item.lines.map((line) => (
-                      <div key={line} className="text-slate-500 text-sm font-body">{line}</div>
+                      <div
+                        key={line}
+                        className="text-slate-500 text-sm font-body"
+                      >
+                        {line}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -115,7 +146,9 @@ export default function ContactSection() {
 
             {/* Office Hours */}
             <div className="bg-gradient-to-br from-blue-900 to-blue-950 rounded-2xl p-6 text-white">
-              <h4 className="font-display text-lg font-bold mb-3">Office Hours</h4>
+              <h4 className="font-display text-lg font-bold mb-3">
+                Office Hours
+              </h4>
               <div className="space-y-2 text-sm font-body">
                 <div className="flex justify-between">
                   <span className="text-white/70">Monday – Friday</span>
@@ -131,14 +164,20 @@ export default function ContactSection() {
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-white/20">
-                <div className="text-orange-400 text-sm font-semibold font-body">24/7 Emergency Support</div>
-                <div className="text-white/70 text-xs font-body mt-0.5">For travelers currently on trips</div>
+                <div className="text-orange-400 text-sm font-semibold font-body">
+                  24/7 Emergency Support
+                </div>
+                <div className="text-white/70 text-xs font-body mt-0.5">
+                  For travelers currently on trips
+                </div>
               </div>
             </div>
 
             {/* Social */}
             <div>
-              <div className="font-semibold text-blue-950 font-body mb-3">Follow Us</div>
+              <div className="font-semibold text-blue-950 font-body mb-3">
+                Follow Us
+              </div>
               <div className="flex gap-2">
                 {SOCIAL.map(({ icon: Icon, label, color }) => (
                   <button
@@ -161,13 +200,23 @@ export default function ContactSection() {
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle2 className="w-8 h-8 text-green-500" />
                   </div>
-                  <h3 className="font-display text-2xl font-bold text-blue-950 mb-2">Message Sent!</h3>
+                  <h3 className="font-display text-2xl font-bold text-blue-950 mb-2">
+                    Message Sent!
+                  </h3>
                   <p className="text-slate-500 font-body mb-6">
-                    Thanks for reaching out, <strong>{form.name}</strong>! We'll reply to{" "}
-                    <strong>{form.email}</strong> within 24 hours.
+                    Thanks for reaching out, <strong>{form.name}</strong>! We'll
+                    reply to <strong>{form.email}</strong> within 24 hours.
                   </p>
                   <button
-                    onClick={() => { setSent(false); setForm({ name: "", email: "", subject: "", message: "" }); }}
+                    onClick={() => {
+                      setSent(false);
+                      setForm({
+                        name: "",
+                        email: "",
+                        subject: "",
+                        message: "",
+                      });
+                    }}
                     className="btn-primary px-6 py-2.5 rounded-full font-semibold font-body text-sm"
                   >
                     Send Another Message
@@ -175,29 +224,64 @@ export default function ContactSection() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
-                  <h3 className="font-display text-2xl font-bold text-blue-950 mb-1">Send a Message</h3>
+                  <h3 className="font-display text-2xl font-bold text-blue-950 mb-1">
+                    Send a Message
+                  </h3>
                   <p className="text-slate-500 text-sm font-body mb-5">
-                    We typically respond within a few hours during business hours.
+                    We typically respond within a few hours during business
+                    hours.
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-1.5 font-body">Your Name *</label>
-                      <input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="John Smith" className={inputClass} />
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5 font-body">
+                        Your Name *
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                        placeholder="John Smith"
+                        className={inputClass}
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-1.5 font-body">Email Address *</label>
-                      <input type="email" name="email" value={form.email} onChange={handleChange} required placeholder="john@example.com" className={inputClass} />
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5 font-body">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        required
+                        placeholder="john@example.com"
+                        className={inputClass}
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5 font-body">Subject *</label>
-                    <input type="text" name="subject" value={form.subject} onChange={handleChange} required placeholder="How can we help you?" className={inputClass} />
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5 font-body">
+                      Subject *
+                    </label>
+                    <input
+                      type="text"
+                      name="subject"
+                      value={form.subject}
+                      onChange={handleChange}
+                      required
+                      placeholder="How can we help you?"
+                      className={inputClass}
+                    />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5 font-body">Message *</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5 font-body">
+                      Message *
+                    </label>
                     <textarea
                       name="message"
                       value={form.message}
