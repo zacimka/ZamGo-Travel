@@ -62,7 +62,11 @@ app.post("/api/admin/login", async (req, res) => {
 
   } catch (err) {
     console.error("Exact login error:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(500).json({ 
+        success: false, 
+        message: "Internal server error",
+        errorInfo: err instanceof Error ? err.message : String(err)
+    });
   }
 });
 
