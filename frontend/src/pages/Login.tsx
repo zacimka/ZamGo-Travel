@@ -11,20 +11,30 @@ export default function Login() {
 
     const onSubmit = async (data: any) => {
         try {
-            const res = await loginMutation.mutateAsync({ email: data.email, password: data.password }) as any;
+            const res = (await loginMutation.mutateAsync({ 
+                email: data.email, 
+                password: data.password 
+            })) as any;
+
             if (res.success && res.token) {
                 localStorage.setItem("token", res.token);
                 toast.success("Login successful!");
-                if (res.role === "admin") {
-                    navigate("/admin");
-                } else {
-                    navigate("/");
-                }
+                
+                // Small delay to ensure localStorage is ready before navigation
+                setTimeout(() => {
+                    if (res.role === "admin") {
+                        navigate("/admin");
+                    } else {
+                        navigate("/");
+                    }
+                }, 100);
             } else {
                 toast.error(res.message || "Invalid credentials");
             }
-        } catch (err) {
-            toast.error("An error occurred during login");
+        } catch (err: any) {
+            console.error("Login component error:", err);
+            const message = err?.shape?.message || err?.message || "An error occurred during login";
+            toast.error(message);
         }
     };
 

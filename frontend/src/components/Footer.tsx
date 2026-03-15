@@ -1,7 +1,7 @@
 /* ZamGo Travel — Footer Component
    Design: Dark blue footer with organized link columns and social icons */
 import { Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, Mail, Phone, MapPin, ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Footer() {
   const navigate = useNavigate();
@@ -140,7 +140,7 @@ export default function Footer() {
                 {item}
               </button>
             ))}
-            <a href="/login" className="text-white/40 hover:text-orange-400 text-xs font-body transition-colors font-medium ml-2 border-l border-white/20 pl-4">Admin Login</a>
+            <Link to="/login" className="text-white/40 hover:text-orange-400 text-xs font-body transition-colors font-medium ml-2 border-l border-white/20 pl-4">Admin Login</Link>
           </div>
           <div className="flex items-center gap-2 text-white/40 text-xs font-body">
             <span>Made with</span>
