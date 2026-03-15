@@ -23,17 +23,16 @@ function App() {
         trpc.createClient({
             links: [
                 httpBatchLink({
-                    url: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/trpc',
+                    // Use relative path to allow Vercel/Render redirects to handle the proxying
+                    url: '/api/trpc',
                     async fetch(url, options) {
-                        console.log('tRPC Calling:', url);
                         const response = await fetch(url, options);
                         
-                        // Check if the response is HTML but we expect JSON
+                        // Detect if we hit a 404 page (HTML) instead of the API
                         const contentType = response.headers.get('content-type');
                         if (contentType && contentType.includes('text/html')) {
-                            const body = await response.text();
-                            console.error('API Error: Expected JSON but received HTML. This usually means the API URL is wrong or the server is returning a 404 page.');
-                            throw new Error(`Cloud hosting (Render/Vercel) returned an HTML 404 page instead of JSON. Please check if VITE_API_URL is correct: ${url}`);
+                            console.error('API Error: Received HTML instead of JSON from:', url);
+                            throw new Error('Server returned HTML (likely a 404 page). Check your API proxy settings.');
                         }
                         
                         return response;
