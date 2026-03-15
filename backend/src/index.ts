@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 
 // Simple JSON health check
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", time: new Date().toISOString() });
+  res.json({ status: "ok", version: "debug-1.1", time: new Date().toISOString() });
 });
 
 app.use(
