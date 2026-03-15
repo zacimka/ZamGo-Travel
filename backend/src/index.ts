@@ -38,8 +38,18 @@ const startServer = async () => {
   }
 
   // Start the HTTP server regardless of whether the DB connection succeeds.
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`🚀 Backend server listening on port ${PORT}`);
+  });
+
+  server.on("error", (error: any) => {
+    if (error?.code === "EADDRINUSE") {
+      console.error(
+        `Port ${PORT} is already in use. Make sure PORT is not hard-coded (e.g., in \`.env\`) and that Render is using its assigned PORT.`,
+      );
+      process.exit(1);
+    }
+    console.error("Server error:", error);
   });
 
   mongoose
