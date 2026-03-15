@@ -9,8 +9,9 @@ import { createContext } from "./trpc";
 const app = express();
 
 // Update CORS to allow your production frontend
+// allow all origins for debugging, but should be narrowed down later
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: true,
   credentials: true
 }));
 
