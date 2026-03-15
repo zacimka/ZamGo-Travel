@@ -11,6 +11,12 @@ import { httpBatchLink } from '@trpc/client';
 import { trpc } from './lib/trpc';
 import { Toaster } from 'sonner';
 
+import Destinations from './pages/Destinations';
+import Packages from './pages/Packages';
+import WhyZamGo from './pages/WhyZamGo';
+import Reviews from './pages/Reviews';
+import Contact from './pages/Contact';
+
 function App() {
     const [queryClient] = useState(() => new QueryClient());
     const [trpcClient] = useState(() =>
@@ -37,6 +43,11 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="/destinations" element={<Destinations />} />
+                        <Route path="/packages" element={<Packages />} />
+                        <Route path="/why-zamgo" element={<WhyZamGo />} />
+                        <Route path="/reviews" element={<Reviews />} />
+                        <Route path="/contact" element={<Contact />} />
                     </Routes>
                 </BrowserRouter>
                 <Toaster position="bottom-right" />

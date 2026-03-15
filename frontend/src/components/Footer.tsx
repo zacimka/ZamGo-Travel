@@ -1,12 +1,10 @@
 /* ZamGo Travel — Footer Component
    Design: Dark blue footer with organized link columns and social icons */
 import { Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, Mail, Phone, MapPin, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Footer() {
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
+  const navigate = useNavigate();
 
   const LINKS = {
     Company: [
@@ -17,21 +15,21 @@ export default function Footer() {
       { label: "Blog", action: () => { } },
     ],
     Destinations: [
-      { label: "Bali, Indonesia", action: () => scrollTo("destinations") },
-      { label: "Paris, France", action: () => scrollTo("destinations") },
-      { label: "Dubai, UAE", action: () => scrollTo("destinations") },
-      { label: "Tokyo, Japan", action: () => scrollTo("destinations") },
-      { label: "Maldives", action: () => scrollTo("destinations") },
+      { label: "Bali, Indonesia", action: () => navigate("/destinations") },
+      { label: "Paris, France", action: () => navigate("/destinations") },
+      { label: "Dubai, UAE", action: () => navigate("/destinations") },
+      { label: "Tokyo, Japan", action: () => navigate("/destinations") },
+      { label: "Maldives", action: () => navigate("/destinations") },
     ],
     Packages: [
-      { label: "Honeymoon Packages", action: () => scrollTo("packages") },
-      { label: "Family Vacations", action: () => scrollTo("packages") },
-      { label: "Adventure Tours", action: () => scrollTo("packages") },
-      { label: "Luxury Escapes", action: () => scrollTo("packages") },
-      { label: "Group Travel", action: () => scrollTo("packages") },
+      { label: "Honeymoon Packages", action: () => navigate("/packages") },
+      { label: "Family Vacations", action: () => navigate("/packages") },
+      { label: "Adventure Tours", action: () => navigate("/packages") },
+      { label: "Luxury Escapes", action: () => navigate("/packages") },
+      { label: "Group Travel", action: () => navigate("/packages") },
     ],
     Support: [
-      { label: "Contact Us", action: () => scrollTo("contact") },
+      { label: "Contact Us", action: () => navigate("/contact") },
       { label: "FAQs", action: () => { } },
       { label: "Cancellation Policy", action: () => { } },
       { label: "Privacy Policy", action: () => { } },
