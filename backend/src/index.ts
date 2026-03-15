@@ -23,6 +23,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Simple JSON health check
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", time: new Date().toISOString() });
+});
+
 app.use(
   "/api/trpc",
   trpcExpress.createExpressMiddleware({
@@ -30,6 +35,11 @@ app.use(
     createContext,
   }),
 );
+
+// Catch-all for failed API matches to ensure we return JSON, not a string
+app.use("/api/*", (req, res) => {
+  res.status(404).json({ error: "API endpoint not found", path: req.path });
+});
 
 import { MongoMemoryServer } from "mongodb-memory-server";
 

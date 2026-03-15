@@ -26,13 +26,25 @@ function App() {
                     // Use relative path to allow Vercel/Render redirects to handle the proxying
                     url: '/api/trpc',
                     async fetch(url, options) {
-                        const response = await fetch(url, options);
+                        const response = await fetch(url.toString(), options);
                         
                         // Detect if we hit a 404 page (HTML) instead of the API
                         const contentType = response.headers.get('content-type');
                         if (contentType && contentType.includes('text/html')) {
                             console.error('API Error: Received HTML instead of JSON from:', url);
                             throw new Error('Server returned HTML (likely a 404 page). Check your API proxy settings.');
+                        }
+                        
+                        // If it's a 204 or empty, tRPC might be okay, but "Unexpected end of JSON" usually means it wasn't.
+                        // We clone the response to read it if we suspect an error.
+                        if (!response.ok) {
+                            const clone = response.clone();
+                            try {
+                                const text = await clone.text();
+                                console.error(`API Error ${response.status}:`, text.substring(0, 200));
+                            } catch (e) {
+                                // ignore
+                            }
                         }
                         
                         return response;
