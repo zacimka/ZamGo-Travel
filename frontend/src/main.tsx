@@ -35,7 +35,11 @@ function App() {
 
                     return (props) => {
                         console.log('tRPC Request:', props.op.path, props.op.input);
-                        return nextLink(props);
+                        const result = nextLink(props);
+                        
+                        // We wrap the result to inspect the flow if possible
+                        // Note: observable results are tricky to inspect here without full interceptors
+                        return result;
                     };
                 },
             ],
