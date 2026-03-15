@@ -59,7 +59,13 @@ const startServer = async () => {
     const mongod = await MongoMemoryServer.create();
     MONGO_URI = mongod.getUri();
     console.log(`In-memory database started at ${MONGO_URI}`);
+  } else {
+    console.log("MONGO_URI loaded from environment");
+    // Log a masked version for safety
+    console.log(`MONGO_URI start: ${MONGO_URI.substring(0, 20)}...`);
   }
+
+  console.log(`JWT_SECRET status: ${process.env.JWT_SECRET ? "Loaded" : "NOT LOADED - using fallback"}`);
 
   // Start the HTTP server regardless of whether the DB connection succeeds.
   const server = app.listen(PORT, () => {
@@ -77,7 +83,11 @@ const startServer = async () => {
   });
 
   mongoose
-    .connect(MONGO_URI)
+    .connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 30000, // Increased for stability
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+    })
     .then(() => {
       console.log("📦 Connected to MongoDB");
     })

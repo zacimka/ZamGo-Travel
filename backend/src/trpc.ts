@@ -13,15 +13,27 @@ export const createContext = async ({
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
     try {
+      console.log("Attempting JWT verify...");
       const decoded = jwt.verify(
         token,
         process.env.JWT_SECRET || "secret",
       ) as any;
       console.log(`Token verified for user ID: ${decoded.id}`);
+      
+      console.log("Attempting User.findById...");
       user = await User.findById(decoded.id);
-      if (!user) console.log(`User not found in DB for ID: ${decoded.id}`);
+      if (!user) {
+        console.log(`User not found in DB for ID: ${decoded.id}`);
+      } else {
+        console.log(`User found: ${user.email}`);
+      }
     } catch (e) {
-      console.log("Token verification failed:", e instanceof Error ? e.message : e);
+      console.log("Token verification process failed:");
+      console.log("Error object:", e);
+      console.log("Error message:", e instanceof Error ? e.message : e);
+      if (e instanceof Error && e.stack) {
+        console.log("Stack trace:", e.stack);
+      }
     }
   } else {
     if (authHeader) console.log("Malformed auth header or missing Bearer prefix");
