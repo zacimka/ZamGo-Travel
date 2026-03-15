@@ -22,26 +22,29 @@ function App() {
     const [trpcClient] = useState(() =>
         trpc.createClient({
             links: [
-                (runtime) => {
-                    const nextLink = httpBatchLink({
-                        url: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/trpc',
-                        headers() {
-                            const token = localStorage.getItem('token');
-                            return {
-                                ...(token && { authorization: `Bearer ${token}` }),
-                            };
-                        },
-                    })(runtime);
-
-                    return (props) => {
-                        console.log('tRPC Request:', props.op.path, props.op.input);
-                        const result = nextLink(props);
+                httpBatchLink({
+                    url: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/trpc',
+                    async fetch(url, options) {
+                        console.log('tRPC Calling:', url);
+                        const response = await fetch(url, options);
                         
-                        // We wrap the result to inspect the flow if possible
-                        // Note: observable results are tricky to inspect here without full interceptors
-                        return result;
-                    };
-                },
+                        // Check if the response is HTML but we expect JSON
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('text/html')) {
+                            const body = await response.text();
+                            console.error('API Error: Expected JSON but received HTML. This usually means the API URL is wrong or the server is returning a 404 page.');
+                            throw new Error(`Cloud hosting (Render/Vercel) returned an HTML 404 page instead of JSON. Please check if VITE_API_URL is correct: ${url}`);
+                        }
+                        
+                        return response;
+                    },
+                    headers() {
+                        const token = localStorage.getItem('token');
+                        return {
+                            ...(token && { authorization: `Bearer ${token}` }),
+                        };
+                    },
+                }),
             ],
         })
     );
