@@ -11,15 +11,15 @@ export default function Login() {
 
     const onSubmit = async (data: any) => {
         try {
-            const res = (await loginMutation.mutateAsync({ 
-                email: data.email, 
-                password: data.password 
+            const res = (await loginMutation.mutateAsync({
+                email: data.email,
+                password: data.password
             })) as any;
 
             if (res.success && res.token) {
                 localStorage.setItem("token", res.token);
                 toast.success("Login successful!");
-                
+
                 // Small delay to ensure localStorage is ready before navigation
                 setTimeout(() => {
                     if (res.role === "admin") {
