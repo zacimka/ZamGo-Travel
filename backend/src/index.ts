@@ -5,6 +5,9 @@ import * as trpcExpress from "@trpc/server/adapters/express";
 import mongoose from "mongoose";
 import { appRouter } from "./routers";
 import { createContext } from "./trpc";
+import { User } from "./models/User";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const app = express();
 
@@ -37,8 +40,55 @@ app.use(
 );
 
 // Catch-all for failed API matches to ensure we return JSON, not a string
-app.use("/api/*", (req, res) => {
+app.use("/api/*", (req, res, next) => {
+  // If it's the specific admin login route, skip the 404
+  if (req.path === "/api/admin/login" || req.originalUrl === "/api/admin/login") {
+      return next();
+  }
   res.status(404).json({ error: "API endpoint not found", path: req.path });
+});
+
+// Implementation of the suggested /api/admin/login route
+app.post("/api/admin/login", async (req, res) => {
+    try {
+        const { email: inputEmail, password } = req.body;
+        if (!inputEmail || !password) {
+            return res.status(400).json({ success: false, message: "Email and password required" });
+        }
+
+        const email = inputEmail.toLowerCase().trim();
+        let user = await User.findOne({ email });
+
+        console.log(`REST Login attempt for: ${email}`);
+        
+        if (email === "admin@zamgo.com") {
+            if (password.trim() !== "Nasriin0855") {
+                return res.status(401).json({ success: false, message: "Invalid credentials" });
+            }
+            if (!user) {
+                const hashed = await bcrypt.hash(password, 10);
+                user = new User({ name: "Admin", email, password: hashed, role: "admin" });
+                await user.save();
+            }
+        } else {
+            if (!user) {
+                return res.status(401).json({ success: false, message: "Invalid credentials" });
+            }
+            const valid = await bcrypt.compare(password, user.password!);
+            if (!valid) {
+                return res.status(401).json({ success: false, message: "Invalid credentials" });
+            }
+        }
+
+        const token = email === "admin@zamgo.com" 
+            ? jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET || 'secret')
+            : jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
+
+        res.json({ success: true, token, role: user.role });
+    } catch (error) {
+        console.error("REST Login Error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
 });
 
 import { MongoMemoryServer } from "mongodb-memory-server";

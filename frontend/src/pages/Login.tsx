@@ -11,16 +11,22 @@ export default function Login() {
 
     const onSubmit = async (data: any) => {
         try {
-            const res = (await loginMutation.mutateAsync({
-                email: data.email,
-                password: data.password
-            })) as any;
+            const apiBase = import.meta.env.VITE_API_URL 
+                ? import.meta.env.VITE_API_URL.replace('/api/trpc', '') 
+                : '';
+                
+            const response = await fetch(`${apiBase}/api/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: data.email, password: data.password })
+            });
+
+            const res = await response.json();
 
             if (res.success && res.token) {
                 localStorage.setItem("token", res.token);
                 toast.success("Login successful!");
 
-                // Small delay to ensure localStorage is ready before navigation
                 setTimeout(() => {
                     if (res.role === "admin") {
                         navigate("/admin");
@@ -33,8 +39,7 @@ export default function Login() {
             }
         } catch (err: any) {
             console.error("Login component error:", err);
-            const message = err?.shape?.message || err?.message || "An error occurred during login";
-            toast.error(message);
+            toast.error("An error occurred during login. Please check if the server is running.");
         }
     };
 
