@@ -22,15 +22,22 @@ function App() {
     const [trpcClient] = useState(() =>
         trpc.createClient({
             links: [
-                httpBatchLink({
-                    url: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/trpc',
-                    headers() {
-                        const token = localStorage.getItem('token');
-                        return {
-                            ...(token && { authorization: `Bearer ${token}` }),
-                        };
-                    },
-                }),
+                (runtime) => {
+                    const nextLink = httpBatchLink({
+                        url: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/trpc',
+                        headers() {
+                            const token = localStorage.getItem('token');
+                            return {
+                                ...(token && { authorization: `Bearer ${token}` }),
+                            };
+                        },
+                    })(runtime);
+
+                    return (props) => {
+                        console.log('tRPC Request:', props.op.path, props.op.input);
+                        return nextLink(props);
+                    };
+                },
             ],
         })
     );
