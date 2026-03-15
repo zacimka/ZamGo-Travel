@@ -26,9 +26,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Simple JSON health check
+// Simple JSON health check with DB status
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", version: "debug-1.1", time: new Date().toISOString() });
+  res.json({ 
+    status: "ok", 
+    version: "debug-1.2", 
+    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    dbState: mongoose.connection.readyState,
+    time: new Date().toISOString() 
+  });
 });
 
 app.use(
@@ -41,6 +47,15 @@ app.use(
 
 // Implementation of the suggested /api/admin/login route
 app.post("/api/admin/login", async (req, res) => {
+  // Check if DB is connected first
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ 
+        success: false, 
+        message: "Database is not connected. Please check your MongoDB Atlas whitelist and URI.",
+        readyState: mongoose.connection.readyState 
+    });
+  }
+
   try {
     const { email, password } = req.body;
 
@@ -119,8 +134,9 @@ const startServer = async () => {
 
   mongoose
     .connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 30000, // Increased for stability
+      serverSelectionTimeoutMS: 30000, 
       socketTimeoutMS: 45000,
+      connectTimeoutMS: 15000, // Detect failure faster
       maxPoolSize: 10,
     })
     .then(() => {
