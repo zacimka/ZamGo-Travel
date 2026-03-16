@@ -43,8 +43,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const login = (token: string, role: string) => {
         localStorage.setItem('token', token);
-        // We could refetch 'me' here, or just wait for next query
-        window.location.reload(); // Simplest way to re-trigger everything for now
+        // We will refetch manually by triggering the query or just reloading
+        // For now, let's navigate first then reload if needed, 
+        // but it's better to just navigate.
+        if (role === 'admin') {
+            window.location.href = '/admin';
+        } else {
+            window.location.href = '/';
+        }
     };
 
     const logout = () => {

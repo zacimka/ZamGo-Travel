@@ -28,15 +28,6 @@ export default function Login() {
             if (res.success && res.token) {
                 toast.success("Login successful!");
                 login(res.token, res.role);
-
-                // Redirect based on role
-                setTimeout(() => {
-                    if (res.role === "admin") {
-                        navigate("/admin");
-                    } else {
-                        navigate("/");
-                    }
-                }, 100);
             } else {
                 toast.error(res.message || "Invalid credentials");
             }

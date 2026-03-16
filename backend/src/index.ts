@@ -85,11 +85,7 @@ app.post("/api/admin/login", async (req, res) => {
   }
 });
 
-// Catch-all for failed API matches - placed AFTER valid routes
-app.use("/api/*", (req, res) => {
-  console.log(`404 - API Not Found: ${req.method} ${req.path}`);
-  res.status(404).json({ error: "API endpoint not found", method: req.method, path: req.path });
-});
+
 
 
 // Protect REST routes with JWT
@@ -127,6 +123,12 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 
 app.get("/", (req, res) => {
   res.send("ZamGo Backend API is running");
+});
+
+// Catch-all for failed API matches - MUST BE LAST
+app.use("/api/*", (req, res) => {
+  console.log(`404 - API Not Found: ${req.method} ${req.path}`);
+  res.status(404).json({ error: "API endpoint not found", method: req.method, path: req.path });
 });
 
 const PORT = process.env.PORT || 3000;
