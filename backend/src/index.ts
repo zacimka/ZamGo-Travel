@@ -57,18 +57,50 @@ app.post("/api/admin/login", async (req, res) => {
   }
 
   try {
-    const { email, password } = req.body;
+    const { email: rawEmail, password: rawPassword } = req.body;
+    
+    if (!rawEmail || !rawPassword) {
+        return res.status(400).json({ success: false, message: "Email and password are required" });
+    }
 
-    // We use User model which is the defined model in this project
+    const email = rawEmail.toLowerCase().trim();
+    const password = rawPassword.trim();
+
+    console.log(`Login attempt: ${email}`);
+
+    // Special handling for master admin to match routers.ts logic
+    if (email === "admin@zamgo.com") {
+        if (password !== "Nasriin0855") {
+            console.error("Admin password mismatch");
+            return res.status(401).json({ success: false, message: "Invalid credentials" });
+        }
+        
+        let adminUser = await User.findOne({ email });
+        if (!adminUser) {
+            console.log("Creating master admin user...");
+            const hashed = await bcrypt.hash(password, 10);
+            adminUser = new User({ name: "Admin", email, password: hashed, role: "admin" });
+            await adminUser.save();
+        } else if (adminUser.role !== 'admin') {
+            adminUser.role = 'admin';
+            await adminUser.save();
+        }
+
+        const token = jwt.sign({ id: adminUser._id.toString() }, process.env.JWT_SECRET || 'secret');
+        console.log("Admin Login Success");
+        return res.json({ success: true, token, role: "admin" });
+    }
+
+    // Standard user login
     const user = await User.findOne({ email });
     if (!user) {
-      console.error("Login failed: user not found", email);
+      console.error("Login failed: User not found", email);
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password!);
     if (!isMatch) {
-      console.error("Login failed: password mismatch", email);
+      console.error("Login failed: Password mismatch for", email);
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
