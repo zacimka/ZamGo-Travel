@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { trpc } from '../lib/trpc';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
     id: string;
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
 
     const meQuery = trpc.auth.me.useQuery(undefined, {
         enabled: !!localStorage.getItem('token'),
@@ -43,20 +45,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const login = (token: string, role: string) => {
         localStorage.setItem('token', token);
-        // We will refetch manually by triggering the query or just reloading
-        // For now, let's navigate first then reload if needed, 
-        // but it's better to just navigate.
+        // Navigate using react-router instead of full reload
         if (role === 'admin') {
-            window.location.href = '/admin';
+            navigate('/admin');
         } else {
-            window.location.href = '/';
+            navigate('/');
         }
     };
 
     const logout = () => {
         localStorage.removeItem('token');
         setUser(null);
-        window.location.href = '/login';
+        navigate('/login');
     };
 
     return (

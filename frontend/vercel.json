@@ -5,7 +5,7 @@
       "destination": "https://zamgo-travel-8.onrender.com/api/:path*"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]

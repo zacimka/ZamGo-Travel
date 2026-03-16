@@ -65,8 +65,8 @@ function App() {
     return (
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <QueryClientProvider client={queryClient}>
-                <AuthProvider>
-                    <BrowserRouter>
+                <BrowserRouter>
+                    <AuthProvider>
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/login" element={<Login />} />
@@ -84,8 +84,8 @@ function App() {
                             <Route path="/reviews" element={<Reviews />} />
                             <Route path="/contact" element={<Contact />} />
                         </Routes>
-                    </BrowserRouter>
-                </AuthProvider>
+                    </AuthProvider>
+                </BrowserRouter>
                 <Toaster position="bottom-right" />
             </QueryClientProvider>
         </trpc.Provider>
