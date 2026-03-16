@@ -25,9 +25,10 @@ function App() {
         trpc.createClient({
             links: [
                 httpBatchLink({
-                    // Prepend Base URL from environment variable
-                    url: `${import.meta.env.VITE_API_URL || ''}/api/trpc`,
+                    // Prepend Base URL from environment variable or use live production fallback
+                    url: `${import.meta.env.VITE_API_URL || 'https://zamgo-travel-8.onrender.com'}/api/trpc`,
                     async fetch(url, options) {
+                        console.log(`tRPC Request URL: ${url}`);
                         const response = await fetch(url.toString(), options);
                         
                         // Detect if we hit a 404 page (HTML) instead of the API

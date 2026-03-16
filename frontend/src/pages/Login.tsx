@@ -13,14 +13,17 @@ export default function Login() {
 
     const onSubmit = async (data: any) => {
         try {
-            const apiBase = import.meta.env.VITE_API_URL || '';
-                
-                
-            const response = await fetch(`${apiBase}/api/admin/login`, {
+            const apiBase = import.meta.env.VITE_API_URL || 'https://zamgo-travel-8.onrender.com';
+            const url = `${apiBase}/api/admin/login`;
+            console.log(`Login Request URL: ${url}`);
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: data.email, password: data.password })
             });
+
+            console.log(`Login Response Status: ${response.status}`);
 
             const res = await response.json();
 

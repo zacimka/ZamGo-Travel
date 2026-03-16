@@ -11,7 +11,7 @@ export default function AdminDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
 
-    const apiBase = import.meta.env.VITE_API_URL || '';
+    const apiBase = import.meta.env.VITE_API_URL || 'https://zamgo-travel-8.onrender.com';
 
     const fetchBookings = async () => {
         setIsLoading(true);
