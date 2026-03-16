@@ -25,8 +25,8 @@ function App() {
         trpc.createClient({
             links: [
                 httpBatchLink({
-                    // Use relative path to allow Vercel/Render redirects to handle the proxying
-                    url: '/api/trpc',
+                    // Use absolute URL from environment if available
+                    url: import.meta.env.VITE_API_URL || '/api/trpc',
                     async fetch(url, options) {
                         const response = await fetch(url.toString(), options);
                         
