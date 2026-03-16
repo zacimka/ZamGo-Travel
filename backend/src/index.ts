@@ -87,12 +87,13 @@ app.post("/api/admin/login", async (req, res) => {
 
 // Catch-all for failed API matches - placed AFTER valid routes
 app.use("/api/*", (req, res) => {
-  res.status(404).json({ error: "API endpoint not found", path: req.path });
+  console.log(`404 - API Not Found: ${req.method} ${req.path}`);
+  res.status(404).json({ error: "API endpoint not found", method: req.method, path: req.path });
 });
 
 
 // Protect REST routes with JWT
-const authenticateAdmin = async (req: any, res: any, next: any) => {
+export const authenticateAdmin = async (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
