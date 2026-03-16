@@ -1,17 +1,21 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
   server: {
     proxy: {
-      "/api": "http://localhost:3000",
+      "/api": {
+        target: "https://zamgo-travel-8.onrender.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\//, ""),
+      },
     },
   },
 });

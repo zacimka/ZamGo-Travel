@@ -25,8 +25,8 @@ function App() {
         trpc.createClient({
             links: [
                 httpBatchLink({
-                    // Use absolute URL from environment or hardcoded production fallback
-                    url: import.meta.env.VITE_API_URL || 'https://zamgo-travel-8.onrender.com/api/trpc',
+                    // Prepend Base URL from environment variable
+                    url: `${import.meta.env.VITE_API_URL || ''}/api/trpc`,
                     async fetch(url, options) {
                         const response = await fetch(url.toString(), options);
                         
