@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { CheckCircle2, XCircle, Clock, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { REST_API_URL } from '../config';
 
 export default function AdminDashboard() {
     const { logout } = useAuth();
@@ -11,11 +12,9 @@ export default function AdminDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
 
-    const apiBase = import.meta.env.VITE_API_URL || 'https://zamgo-travel-8.onrender.com';
-
     const fetchBookings = async () => {
         setIsLoading(true);
-        const url = `${apiBase}/api/admin/bookings`;
+        const url = `${REST_API_URL}/admin/bookings`;
         console.log(`Fetching bookings from: ${url}`);
         
         try {
@@ -45,7 +44,7 @@ export default function AdminDashboard() {
     }, []);
 
     const updateStatus = async (id: string, status: string) => {
-        const url = `${apiBase}/api/admin/bookings/${id}/status`;
+        const url = `${REST_API_URL}/admin/bookings/${id}/status`;
         console.log(`Updating booking ${id} status to ${status} at: ${url}`);
         
         try {

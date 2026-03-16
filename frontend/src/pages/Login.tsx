@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LogIn } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { REST_API_URL } from '../config';
 
 export default function Login() {
     const { login } = useAuth();
@@ -13,8 +14,7 @@ export default function Login() {
 
     const onSubmit = async (data: any) => {
         try {
-            const apiBase = import.meta.env.VITE_API_URL || 'https://zamgo-travel-8.onrender.com';
-            const url = `${apiBase}/api/admin/login`;
+            const url = `${REST_API_URL}/admin/login`;
             console.log(`Login Request URL: ${url}`);
 
             const response = await fetch(url, {
