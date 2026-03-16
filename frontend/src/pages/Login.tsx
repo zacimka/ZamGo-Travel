@@ -15,7 +15,7 @@ export default function Login() {
         try {
             const apiBase = import.meta.env.VITE_API_URL 
                 ? import.meta.env.VITE_API_URL.replace('/api/trpc', '') 
-                : '';
+                : 'https://zamgo-travel-8.onrender.com';
                 
             const response = await fetch(`${apiBase}/api/admin/login`, {
                 method: 'POST',

@@ -13,7 +13,7 @@ export default function AdminDashboard() {
 
     const apiBase = import.meta.env.VITE_API_URL 
         ? import.meta.env.VITE_API_URL.replace('/api/trpc', '') 
-        : '';
+        : 'https://zamgo-travel-8.onrender.com';
 
     const fetchBookings = async () => {
         setIsLoading(true);
