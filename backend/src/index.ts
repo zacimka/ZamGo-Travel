@@ -91,6 +91,37 @@ app.use("/api/*", (req, res) => {
 });
 
 
+// Protect REST routes with JWT
+const authenticateAdmin = async (req: any, res: any, next: any) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
+    }
+    const token = authHeader.split(" ")[1];
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
+        const user = await User.findById(decoded.id);
+        if (!user || user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: "Forbidden: Admin access only" });
+        }
+        req.user = user;
+        next();
+    } catch (err) {
+        return res.status(401).json({ success: false, message: "Unauthorized: Invalid token" });
+    }
+};
+
+// REST route for testing bookings in Postman easily
+app.get("/api/admin/bookings", authenticateAdmin, async (req, res) => {
+    try {
+        const bookings = await Booking.find().sort({ createdAt: -1 });
+        res.json({ success: true, bookings });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Failed to fetch bookings" });
+    }
+});
+
+import { Booking } from "./models/Booking";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
 app.get("/", (req, res) => {
