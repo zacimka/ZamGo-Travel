@@ -19,14 +19,16 @@ import Contact from './pages/Contact';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
+const PROD_API_URL = 'https://zamgo-travel-8.onrender.com';
+
 function App() {
     const [queryClient] = useState(() => new QueryClient());
     const [trpcClient] = useState(() =>
         trpc.createClient({
             links: [
                 httpBatchLink({
-                    // Prepend Base URL from environment variable or use live production fallback
-                    url: `${import.meta.env.VITE_API_URL || 'https://zamgo-travel-8.onrender.com'}/api/trpc`,
+                    // Use the direct absolute URL to bypass Vercel proxy issues entirely
+                    url: `${PROD_API_URL}/api/trpc`,
                     async fetch(url, options) {
                         console.log(`tRPC Request URL: ${url}`);
                         const response = await fetch(url.toString(), options);
