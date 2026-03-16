@@ -1,4 +1,4 @@
-import { trpc } from "../lib/trpc";
+import React, { useEffect, useState } from 'react';
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, Clock, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,23 +7,78 @@ import { useAuth } from "../contexts/AuthContext";
 export default function AdminDashboard() {
     const { logout } = useAuth();
     const navigate = useNavigate();
-    const { data: bookings, refetch, isLoading, isError } = trpc.bookings.getAllBookings.useQuery();
-    const updateStatus = trpc.bookings.updateBookingStatus.useMutation({
-        onSuccess: () => {
-            toast.success("Booking status updated!");
-            refetch();
-        },
-        onError: (err) => {
-            toast.error(err.message || "Failed to update booking status");
+    const [bookings, setBookings] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
+
+    const apiBase = import.meta.env.VITE_API_URL 
+        ? import.meta.env.VITE_API_URL.replace('/api/trpc', '') 
+        : '';
+
+    const fetchBookings = async () => {
+        setIsLoading(true);
+        const url = `${apiBase}/api/admin/bookings`;
+        console.log(`Fetching bookings from: ${url}`);
+        
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log(`Response status: ${response.status}`);
+            
+            if (!response.ok) throw new Error('Failed to fetch');
+            
+            const data = await response.json();
+            setBookings(data.bookings || []);
+            setIsError(false);
+        } catch (err) {
+            console.error('Error fetching bookings:', err);
+            setIsError(true);
+        } finally {
+            setIsLoading(false);
         }
-    });
+    };
+
+    useEffect(() => {
+        fetchBookings();
+    }, []);
+
+    const updateStatus = async (id: string, status: string) => {
+        const url = `${apiBase}/api/admin/bookings/${id}/status`;
+        console.log(`Updating booking ${id} status to ${status} at: ${url}`);
+        
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status })
+            });
+            
+            console.log(`Status update response: ${response.status}`);
+            const resData = await response.json();
+            
+            if (resData.success) {
+                toast.success("Booking status updated!");
+                fetchBookings();
+            } else {
+                toast.error(resData.message || "Failed to update status");
+            }
+        } catch (err) {
+            console.error('Error updating status:', err);
+            toast.error("Failed to update booking status");
+        }
+    };
 
     const handleLogout = () => {
         logout();
     };
-
-    if (isLoading) return <div className="p-10 text-center font-body text-slate-500">Loading bookings...</div>;
-    if (isError) return <div className="p-10 text-center font-body text-red-500">Failed to load bookings. Are you logged in as admin?</div>;
 
     const StatusIcon = ({ status }: { status: string }) => {
         switch (status) {
@@ -46,6 +101,9 @@ export default function AdminDashboard() {
                         <span className="hidden sm:inline">Sign Out</span>
                     </button>
                 </div>
+
+                {isLoading && <div className="p-10 text-center font-body text-slate-500">Loading bookings...</div>}
+                {isError && <div className="p-10 text-center font-body text-red-500">Failed to load bookings. Are you logged in as admin?</div>}
 
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden animate-fade-up">
                     <div className="overflow-x-auto">
@@ -84,7 +142,7 @@ export default function AdminDashboard() {
                                             <td className="py-4 px-6 text-right space-x-2">
                                                 {booking.status === 'pending' && (
                                                     <button
-                                                        onClick={() => updateStatus.mutate({ id: booking._id, status: 'confirmed' })}
+                                                        onClick={() => updateStatus(booking._id, 'confirmed')}
                                                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
                                                     >
                                                         Approve
@@ -92,7 +150,7 @@ export default function AdminDashboard() {
                                                 )}
                                                 {booking.status !== 'cancelled' && (
                                                     <button
-                                                        onClick={() => updateStatus.mutate({ id: booking._id, status: 'cancelled' })}
+                                                        onClick={() => updateStatus(booking._id, 'cancelled')}
                                                         className="text-slate-500 hover:text-red-500 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-white hover:bg-red-50 border border-slate-200"
                                                     >
                                                         Cancel

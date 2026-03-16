@@ -150,6 +150,27 @@ app.get("/api/admin/bookings", authenticateAdmin, async (req, res) => {
     }
 });
 
+// REST route for updating booking status
+app.patch("/api/admin/bookings/:id/status", authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        
+        if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+            return res.status(400).json({ success: false, message: "Invalid status" });
+        }
+
+        const booking = await Booking.findByIdAndUpdate(id, { status }, { new: true });
+        if (!booking) {
+            return res.status(404).json({ success: false, message: "Booking not found" });
+        }
+
+        res.json({ success: true, booking });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Failed to update booking status" });
+    }
+});
+
 import { Booking } from "./models/Booking";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
